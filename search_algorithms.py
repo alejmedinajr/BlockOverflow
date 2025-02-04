@@ -15,36 +15,62 @@ class SearchAlgorithms:
         """Helper function to reconstruct the path from start to goal."""
         path, current = [], goal
         while current in came_from:
-            path.append((current[1], current[0]))  # Swap (x, y) -> (y, x)
+            path.append(current)  # Keep (x, y) order consistent
             current = came_from[current]
-        return path[::-1] if path else []
+        path.append(start)
+        path.reverse()  # Ensure correct order from start to goal
+        return path if path else []
 
     def _is_valid(self, maze, position):
         """Check if a position is within the maze bounds and walkable."""
-        x, y = position
+        x, y = position  # Keep order consistent
         return 0 <= y < len(maze) and 0 <= x < len(maze[0]) and maze[y][x] in [0, 2, 3]
 
     def breadth_first_search(self, start, goal, maze):
         """Breadth-First Search (BFS) using a queue."""
         queue, visited, came_from = deque([start]), {start}, {}
+        visited_nodes = []
+
         while queue:
             node = queue.popleft()
-            if node == goal:
-                return self._reconstruct_path(came_from, start, goal)
-            [queue.append(neighbor) or visited.add(neighbor) or came_from.update({neighbor: node})
-             for dx, dy in self.directions if (neighbor := (node[0] + dx, node[1] + dy)) not in visited and self._is_valid(maze, neighbor)]
-        return []
+
+            if node == (goal[1], goal[0]):
+                final_path = self._reconstruct_path(came_from, (start[1],start[0]), (goal[1], goal[0]))
+                return visited_nodes, final_path  # Stop immediately
+
+            if self._is_valid(maze, node): visited_nodes.append(node)
+
+            for dx, dy in self.directions:
+                neighbor = (node[0] + dx, node[1] + dy)
+                if neighbor not in visited and self._is_valid(maze, neighbor):
+                    queue.append(neighbor)
+                    visited.add(neighbor)
+                    came_from[neighbor] = node
+
+        return visited_nodes, []  # Return empty path if goal not found
 
     def depth_first_search(self, start, goal, maze):
         """Depth-First Search (DFS) using a stack."""
         stack, visited, came_from = [start], {start}, {}
+        visited_nodes = []
+
         while stack:
             node = stack.pop()
-            if node == goal:
-                return self._reconstruct_path(came_from, start, goal)
-            [stack.append(neighbor) or visited.add(neighbor) or came_from.update({neighbor: node})
-             for dx, dy in self.directions if (neighbor := (node[0] + dx, node[1] + dy)) not in visited and self._is_valid(maze, neighbor)]
-        return []
+
+            if node == (goal[1], goal[0]):
+                final_path = self._reconstruct_path(came_from, (start[1],start[0]), (goal[1], goal[0]))
+                return visited_nodes, final_path  # Stop immediately
+
+            if self._is_valid(maze, node): visited_nodes.append(node)
+
+            for dx, dy in self.directions:
+                neighbor = (node[0] + dx, node[1] + dy)
+                if neighbor not in visited and self._is_valid(maze, neighbor):
+                    stack.append(neighbor)
+                    visited.add(neighbor)
+                    came_from[neighbor] = node
+
+        return visited_nodes, []  # Return empty path if goal not found
 
     def a_star_search(self, start, goal, maze):
         """A* Search using a priority queue."""
