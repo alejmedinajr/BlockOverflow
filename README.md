@@ -1,4 +1,4 @@
-# 🔩 BlockOverflow: Learn Python with Minecraft
+# BlockOverflow: Learn Python with Minecraft
 
 ## 📌 Overview  
 Welcome to **BlockOverflow**! This project leverages **Minecraft** as an interactive medium for teaching **computer science principles in Python**. Using **[Evocraft-py](https://github.com/real-itu/Evocraft-py)** (added as a submodule from the official repository), we enable **programmatic control of Minecraft** to visualize algorithms, generate structures, and demonstrate coding concepts in a fun, engaging way.
