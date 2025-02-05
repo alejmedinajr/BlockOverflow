@@ -74,10 +74,10 @@ def spawn_maze(client, maze, block_type, orientation, start_x=-25, start_y=5, st
         for x in range(len(maze[0])):
             if maze[z, x] == 2:
                 start = (z,x)
-                blocks.append(Block(position=Point(x=start_x + x, y=start_y, z=start_z + z), type=REDSTONE_BLOCK, orientation=NORTH))
+                blocks.append(Block(position=Point(x=start_x + x, y=start_y, z=start_z + z), type=RED_GLAZED_TERRACOTTA, orientation=NORTH))
             elif maze[z, x] == 3:
                 end = (z,x)
-                blocks.append(Block(position=Point(x=start_x + x, y=start_y, z=start_z + z), type=EMERALD_BLOCK, orientation=NORTH))
+                blocks.append(Block(position=Point(x=start_x + x, y=start_y, z=start_z + z), type=RED_GLAZED_TERRACOTTA, orientation=NORTH))
 
     client.spawnBlocks(Blocks(blocks=blocks))
     return start, end
@@ -87,46 +87,56 @@ def visualize_search(client, visited_nodes, final_path, start_x=-25, start_y=5, 
     # Show visited nodes first
     for x, z in visited_nodes:
         client.spawnBlocks(Blocks(blocks=[
-            Block(position=Point(x=start_x + x, y=start_y, z=start_z + z), type=CYAN_GLAZED_TERRACOTTA, orientation=NORTH)
+            Block(position=Point(x=start_x + x, y=start_y, z=start_z + z), type=LIGHT_BLUE_GLAZED_TERRACOTTA, orientation=NORTH)
         ]))
         time.sleep(delay)
-    time.sleep(delay)
+
+    time.sleep(delay) # short delay for recording purposesp
     # Show final path in redstone blocks
     for x, z in final_path:
         client.spawnBlocks(Blocks(blocks=[
-            Block(position=Point(x=start_x + x, y=start_y, z=start_z + z), type=REDSTONE_BLOCK, orientation=NORTH)
+            Block(position=Point(x=start_x + x, y=start_y, z=start_z + z), type=RED_GLAZED_TERRACOTTA, orientation=NORTH)
         ]))
 
-# Generate a 101x101 maze
-maze_size = 50  # Set to 50 to generate a 101x101 maze
+def generate(client, maze, maze_size=50, delay=2, algorithm="depth_first_search", **kwargs):
+    """
+    Generates a maze in Minecraft, clears the area, spawns the maze, and runs a specified search algorithm.
 
+    Parameters:
+    - client: Minecraft client
+    - maze: The maze structure
+    - maze_size: Size of the maze (default: 50)
+    - delay: Delay before visualization (default: 2s)
+    - algorithm: The search algorithm to use (options: "depth_first_search", "breadth_first_search", "a_star_search", "uniform_cost_search")
+    """
+    clear_area(client, maze_size*5)  # Clear the area before spawning
+    time.sleep(delay)
+
+    start, goal = spawn_maze(client, maze, block_type=QUARTZ_BLOCK, orientation=NORTH)  # Spawn the maze
+    time.sleep(delay)
+
+    search_algorithms = SearchAlgorithms()  # Initialize search algorithms
+
+    # Select and run the specified search algorithm
+    if hasattr(search_algorithms, algorithm):  # Ensure the algorithm exists
+        search_function = getattr(search_algorithms, algorithm)
+        visited, final_path = search_function(start, goal, maze.tolist(), **kwargs)
+    else:  raise ValueError(f"Invalid search algorithm: {algorithm}")
+
+    # Visualize the search process
+    visualize_search(client, visited, final_path)
+
+    print(f"Generated {maze_size}x{maze_size} maze with Start (Redstone), Goal (Emerald), and step-by-step {algorithm} visualization in Minecraft!")
+
+maze_size, delay = 50, 2
 maze = create_maze(maze_size)
-print(maze)
-# Clear the area before spawning
-clear_area(client, size=205)
-time.sleep(3)
-# Spawn the maze with STONE walls, Redstone start, and Emerald goal
-start, goal = spawn_maze(client, maze, block_type=STONE, orientation=NORTH)
-time.sleep(1)
-# Initialize search algorithms
-search_algorithms = SearchAlgorithms()
-
-# Run a search algorithm and visualize its path
-
-visited, final_path = search_algorithms.depth_first_search(start, goal, maze.tolist())
-print(final_path)
-print(start, goal)
-visualize_search(client, visited, final_path)
-
-clear_area(client, size=205)
-time.sleep(3)
-# Spawn the maze with STONE walls, Redstone start, and Emerald goal
-start, goal = spawn_maze(client, maze, block_type=STONE, orientation=NORTH)
-time.sleep(1)
-# Initialize search algorithms
-search_algorithms = SearchAlgorithms()
-
-# Run a search algorithm and visualize its path
-visited, final_path = search_algorithms.breadth_first_search(start, goal, maze.tolist())
-visualize_search(client, visited, final_path)
-print("Randomized 50x50 maze with Start (Redstone), Goal (Emerald), and step-by-step visualization spawned in Minecraft!")
+time.sleep(10)
+generate(client, maze, maze_size, 0, "depth_first_search")
+time.sleep(10)
+generate(client, maze, maze_size, 0, "breadth_first_search")
+time.sleep(10)
+generate(client, maze, maze_size, 0, "greedy_search", use_g_score=False)
+time.sleep(10)
+generate(client, maze, maze_size, 0, "greedy_search", use_g_score=True)
+time.sleep(10)
+generate(client, maze, maze_size, 0, "jump_point_search")
