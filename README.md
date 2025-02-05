@@ -41,10 +41,10 @@ pip install -r requirements.txt
 Search algorithms are crucial in computer science for finding data efficiently. Here, we visualize search methods using **blocks in Minecraft**.
 
 #### 🔍 Implemented Search Methods:  
-- **Breadth-First Search (BFS)** – Explores nodes level by level.
-- **Depth-First Search (DFS)** – Explores deep paths first.
-- **A-star Search** – Uses heuristics for optimal pathfinding.
-- **Uniform Cost Search (UCS)**
+- **Breadth-First Search (BFS)**
+- **Depth-First Search (DFS)**
+- **Greedy Search**
+- **Jump Point Search**
 
 #### 🎥 **Video Demonstration:**  
 [![Search Algorithms in Minecraft](https://img.youtube.com/vi/YOUR_VIDEO_ID/0.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)  
